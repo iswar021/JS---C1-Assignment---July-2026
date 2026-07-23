@@ -1,9 +1,16 @@
 import { Prisma } from '@prisma/client';
-import { NotFoundError, ValidationError } from '../../errors/AppError';
-import { userRepository } from '../users/user.repository';
+import { ConflictError, NotFoundError } from '../../errors/AppError';
+import { assertUserExists } from '../users/user.guards';
 import { ticketRepository, TicketWithDetails, TicketWithRefs } from './ticket.repository';
 import { serializeTicketSummary, TicketSummaryDTO } from './ticket.mapper';
-import { CreateTicketInput, ListTicketsQuery, UpdateTicketInput } from './ticket.schema';
+import { canTransition } from '../../services/statusMachine';
+import {
+  AssignTicketInput,
+  ChangeStatusInput,
+  CreateTicketInput,
+  ListTicketsQuery,
+  UpdateTicketInput,
+} from './ticket.schema';
 
 export interface PaginatedTickets {
   data: TicketSummaryDTO[];
@@ -36,12 +43,7 @@ export async function updateTicket(
   }
 
   if (input.assignedToId) {
-    const assigneeExists = await userRepository.existsById(input.assignedToId);
-    if (!assigneeExists) {
-      throw new ValidationError('Validation failed', {
-        assignedToId: ['User does not exist'],
-      });
-    }
+    await assertUserExists(input.assignedToId, 'assignedToId');
   }
 
   const data: Prisma.TicketUncheckedUpdateInput = {};
@@ -53,13 +55,66 @@ export async function updateTicket(
   return ticketRepository.update(id, data);
 }
 
+/**
+ * Assigns (or unassigns) a ticket.
+ *  - the ticket must exist (else 404);
+ *  - a non-null assignee must reference an existing user (else 400);
+ *  - passing null unassigns the ticket.
+ */
+export async function assignTicket(
+  id: string,
+  input: AssignTicketInput,
+): Promise<TicketWithDetails> {
+  const exists = await ticketRepository.exists(id);
+  if (!exists) {
+    throw new NotFoundError('Ticket not found');
+  }
+
+  if (input.assignedToId) {
+    await assertUserExists(input.assignedToId, 'assignedToId');
+  }
+
+  return ticketRepository.update(id, { assignedToId: input.assignedToId });
+}
+
+/**
+ * Changes a ticket's status through the enforced state machine.
+ *  - the ticket must exist (else 404);
+ *  - the transition must be allowed (else 409 INVALID_TRANSITION).
+ */
+export async function changeStatus(
+  id: string,
+  input: ChangeStatusInput,
+): Promise<TicketWithDetails> {
+  const ticket = await ticketRepository.findById(id);
+  if (!ticket) {
+    throw new NotFoundError('Ticket not found');
+  }
+
+  const from = ticket.status;
+  const to = input.status;
+
+  if (!canTransition(from, to)) {
+    throw new ConflictError(
+      `Cannot change status from ${from} to ${to}.`,
+      'INVALID_TRANSITION',
+    );
+  }
+
+  return ticketRepository.updateStatus(id, to);
+}
+
 /** Lists tickets with keyword/status filtering and pagination. */
 export async function listTickets(query: ListTicketsQuery): Promise<PaginatedTickets> {
-  const { q, status, page, pageSize } = query;
+  const { q, status, priority, assignedTo, sortBy, sortOrder, page, pageSize } = query;
 
   const { items, total } = await ticketRepository.list({
     q,
     status,
+    priority,
+    assignedTo,
+    sortBy,
+    sortOrder,
     skip: (page - 1) * pageSize,
     take: pageSize,
   });
@@ -81,20 +136,10 @@ export async function listTickets(query: ListTicketsQuery): Promise<PaginatedTic
  * than leaking a database foreign-key error.
  */
 export async function createTicket(input: CreateTicketInput): Promise<TicketWithRefs> {
-  const creatorExists = await userRepository.existsById(input.createdById);
-  if (!creatorExists) {
-    throw new ValidationError('Validation failed', {
-      createdById: ['User does not exist'],
-    });
-  }
+  await assertUserExists(input.createdById, 'createdById');
 
   if (input.assignedToId) {
-    const assigneeExists = await userRepository.existsById(input.assignedToId);
-    if (!assigneeExists) {
-      throw new ValidationError('Validation failed', {
-        assignedToId: ['User does not exist'],
-      });
-    }
+    await assertUserExists(input.assignedToId, 'assignedToId');
   }
 
   return ticketRepository.create({

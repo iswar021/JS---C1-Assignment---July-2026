@@ -29,14 +29,43 @@ export type CreateTicketInput = z.infer<typeof createTicketSchema>;
  */
 export const listTicketsQuerySchema = z.object({
   q: z.string().trim().min(1).optional(),
-  status: z.nativeEnum(Status, {
-    errorMap: () => ({ message: 'Invalid status filter' }),
-  }).optional(),
+  status: z
+    .nativeEnum(Status, { errorMap: () => ({ message: 'Invalid status filter' }) })
+    .optional(),
+  priority: z
+    .nativeEnum(Priority, { errorMap: () => ({ message: 'Invalid priority filter' }) })
+    .optional(),
+  assignedTo: z.string().uuid('assignedTo must be a valid user id').optional(),
+  sortBy: z.enum(['createdAt', 'updatedAt', 'priority']).default('updatedAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
 
 export type ListTicketsQuery = z.infer<typeof listTicketsQuerySchema>;
+
+/** Request schema for the status-change endpoint (state machine). */
+export const changeStatusSchema = z
+  .object({
+    status: z.nativeEnum(Status, {
+      errorMap: () => ({ message: 'Invalid status value' }),
+    }),
+  })
+  .strict('Unknown field');
+
+export type ChangeStatusInput = z.infer<typeof changeStatusSchema>;
+
+/**
+ * Request schema for the assign endpoint. `assignedToId` is required but may be
+ * `null` to explicitly unassign a ticket.
+ */
+export const assignTicketSchema = z
+  .object({
+    assignedToId: z.string().uuid('assignedToId must be a valid user id').nullable(),
+  })
+  .strict('Unknown field');
+
+export type AssignTicketInput = z.infer<typeof assignTicketSchema>;
 
 /**
  * Request schema for updating ticket fields. All fields optional, but at least

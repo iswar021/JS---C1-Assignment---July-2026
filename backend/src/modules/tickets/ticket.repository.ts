@@ -1,4 +1,4 @@
-import { Prisma, Status } from '@prisma/client';
+import { Prisma, Priority, Status } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 
 /** Relations always loaded with a ticket so the API can return user references. */
@@ -24,6 +24,10 @@ export type TicketWithDetails = Prisma.TicketGetPayload<{ include: typeof ticket
 export interface ListTicketsParams {
   q?: string;
   status?: Status;
+  priority?: Priority;
+  assignedTo?: string;
+  sortBy: 'createdAt' | 'updatedAt' | 'priority';
+  sortOrder: 'asc' | 'desc';
   skip: number;
   take: number;
 }
@@ -50,14 +54,22 @@ export const ticketRepository = {
     return prisma.ticket.update({ where: { id }, data, include: ticketDetailInclude });
   },
 
+  /** Persists a status change and returns the ticket with its comments. */
+  updateStatus(id: string, status: Status): Promise<TicketWithDetails> {
+    return prisma.ticket.update({ where: { id }, data: { status }, include: ticketDetailInclude });
+  },
+
   /**
-   * Returns a page of tickets matching the optional keyword/status filters, plus
-   * the total match count (for pagination). Keyword search is case-insensitive
-   * across title and description. Newest-updated first.
+   * Returns a page of tickets matching the optional filters (keyword, status,
+   * priority, assignee), plus the total match count (for pagination). Keyword
+   * search is case-insensitive across title and description. Sorting is
+   * configurable; a stable secondary sort by id keeps paging deterministic.
    */
   async list(params: ListTicketsParams): Promise<{ items: TicketWithRefs[]; total: number }> {
     const where: Prisma.TicketWhereInput = {
       ...(params.status ? { status: params.status } : {}),
+      ...(params.priority ? { priority: params.priority } : {}),
+      ...(params.assignedTo ? { assignedToId: params.assignedTo } : {}),
       ...(params.q
         ? {
             OR: [
@@ -68,11 +80,16 @@ export const ticketRepository = {
         : {}),
     };
 
+    const orderBy: Prisma.TicketOrderByWithRelationInput[] = [
+      { [params.sortBy]: params.sortOrder },
+      { id: 'asc' },
+    ];
+
     const [items, total] = await prisma.$transaction([
       prisma.ticket.findMany({
         where,
         include: ticketInclude,
-        orderBy: { updatedAt: 'desc' },
+        orderBy,
         skip: params.skip,
         take: params.take,
       }),

@@ -62,12 +62,16 @@ List tickets with optional keyword search, status filter, and pagination.
 Results are ordered by `updatedAt` descending (newest first).
 
 **Query params**
-| Param      | Type   | Default | Notes |
-| ---------- | ------ | ------- | ----- |
-| `q`        | string | –       | Case-insensitive match on title OR description |
-| `status`   | enum   | –       | Filter by exact status; invalid value → 400 |
-| `page`     | int    | 1       | 1-based page number; `< 1` → 400 |
-| `pageSize` | int    | 20      | 1–100; out of range → 400 |
+| Param        | Type   | Default      | Notes |
+| ------------ | ------ | ------------ | ----- |
+| `q`          | string | –            | Case-insensitive match on title OR description |
+| `status`     | enum   | –            | Filter by exact status; invalid value → 400 |
+| `priority`   | enum   | –            | Filter by priority; invalid value → 400 |
+| `assignedTo` | uuid   | –            | Filter by assignee user id |
+| `sortBy`     | enum   | `updatedAt`  | One of `createdAt` \| `updatedAt` \| `priority` |
+| `sortOrder`  | enum   | `desc`       | `asc` \| `desc` |
+| `page`       | int    | 1            | 1-based page number; `< 1` → 400 |
+| `pageSize`   | int    | 20           | 1–100; out of range → 400 |
 
 **200** — paginated envelope. List items are a light **summary** (no `comments`).
 ```json
@@ -163,6 +167,20 @@ Update ticket fields. **Does not change status** (use the status endpoint).
 - **200** → updated ticket
 - **400** `VALIDATION_ERROR`
 - **404** `NOT_FOUND`
+
+---
+
+### `PATCH /api/tickets/:id/assign`
+Assign or unassign a ticket. `assignedToId` is required but may be `null` to unassign.
+
+**Request**
+```json
+{ "assignedToId": "uuid-or-null" }
+```
+**Responses**
+- **200** → updated ticket
+- **400** `VALIDATION_ERROR` — missing/invalid `assignedToId`, or assignee does not exist
+- **404** `NOT_FOUND` — ticket does not exist
 
 ---
 

@@ -45,3 +45,25 @@ export const updateTicket: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+/** PATCH /api/tickets/:id/assign — assign or unassign a ticket. */
+export const assignTicket: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = res.locals.params as TicketIdParam;
+    const ticket = await ticketService.assignTicket(id, req.body);
+    res.json(serializeTicket(ticket));
+  } catch (err) {
+    next(err);
+  }
+};
+
+/** PATCH /api/tickets/:id/status — change status through the state machine. */
+export const changeStatus: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = res.locals.params as TicketIdParam;
+    const ticket = await ticketService.changeStatus(id, req.body);
+    res.json(serializeTicket(ticket));
+  } catch (err) {
+    next(err);
+  }
+};
