@@ -1,7 +1,35 @@
 import { ValidationError } from '../../errors/AppError';
 import { userRepository } from '../users/user.repository';
 import { ticketRepository, TicketWithRefs } from './ticket.repository';
-import { CreateTicketInput } from './ticket.schema';
+import { serializeTicketSummary, TicketSummaryDTO } from './ticket.mapper';
+import { CreateTicketInput, ListTicketsQuery } from './ticket.schema';
+
+export interface PaginatedTickets {
+  data: TicketSummaryDTO[];
+  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+}
+
+/** Lists tickets with keyword/status filtering and pagination. */
+export async function listTickets(query: ListTicketsQuery): Promise<PaginatedTickets> {
+  const { q, status, page, pageSize } = query;
+
+  const { items, total } = await ticketRepository.list({
+    q,
+    status,
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+  });
+
+  return {
+    data: items.map(serializeTicketSummary),
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
+  };
+}
 
 /**
  * Creates a ticket after verifying that the referenced users exist.

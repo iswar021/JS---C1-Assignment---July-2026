@@ -58,31 +58,37 @@ List seeded users (for assignee/creator selection in the UI).
 ## Tickets
 
 ### `GET /api/tickets`
-List tickets with optional keyword search and status filter.
+List tickets with optional keyword search, status filter, and pagination.
+Results are ordered by `updatedAt` descending (newest first).
 
 **Query params**
-| Param    | Type   | Notes |
-| -------- | ------ | ----- |
-| `q`      | string | Case-insensitive match on title OR description |
-| `status` | enum   | Filter by exact status; invalid value → 400 |
+| Param      | Type   | Default | Notes |
+| ---------- | ------ | ------- | ----- |
+| `q`        | string | –       | Case-insensitive match on title OR description |
+| `status`   | enum   | –       | Filter by exact status; invalid value → 400 |
+| `page`     | int    | 1       | 1-based page number; `< 1` → 400 |
+| `pageSize` | int    | 20      | 1–100; out of range → 400 |
 
-**200**
+**200** — paginated envelope. List items are a light **summary** (no `comments`).
 ```json
-[
-  {
-    "id": "uuid",
-    "title": "Cannot log in",
-    "description": "500 on submit",
-    "priority": "HIGH",
-    "status": "OPEN",
-    "assignedTo": { "id": "uuid", "name": "Bob Agent" },
-    "createdBy":  { "id": "uuid", "name": "Dave Requester" },
-    "createdAt": "2026-07-23T18:00:00.000Z",
-    "updatedAt": "2026-07-23T18:00:00.000Z"
-  }
-]
+{
+  "data": [
+    {
+      "id": "uuid",
+      "title": "Cannot log in",
+      "description": "500 on submit",
+      "priority": "HIGH",
+      "status": "OPEN",
+      "assignedTo": { "id": "uuid", "name": "Bob Agent" },
+      "createdBy":  { "id": "uuid", "name": "Dave Requester" },
+      "createdAt": "2026-07-23T18:00:00.000Z",
+      "updatedAt": "2026-07-23T18:00:00.000Z"
+    }
+  ],
+  "pagination": { "page": 1, "pageSize": 20, "total": 1, "totalPages": 1 }
+}
 ```
-No matches → `200` with `[]`.
+No matches → `200` with `{ "data": [], "pagination": { ... "total": 0, "totalPages": 0 } }`.
 
 ---
 

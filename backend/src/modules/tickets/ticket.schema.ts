@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Priority } from '@prisma/client';
+import { Priority, Status } from '@prisma/client';
 
 /**
  * Request schema for creating a ticket.
@@ -21,3 +21,19 @@ export const createTicketSchema = z.object({
 });
 
 export type CreateTicketInput = z.infer<typeof createTicketSchema>;
+
+/**
+ * Query schema for listing tickets: optional keyword search + status filter,
+ * with pagination (1-based page, bounded page size). Values are coerced from
+ * their string query-param form and defaulted.
+ */
+export const listTicketsQuerySchema = z.object({
+  q: z.string().trim().min(1).optional(),
+  status: z.nativeEnum(Status, {
+    errorMap: () => ({ message: 'Invalid status filter' }),
+  }).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export type ListTicketsQuery = z.infer<typeof listTicketsQuerySchema>;

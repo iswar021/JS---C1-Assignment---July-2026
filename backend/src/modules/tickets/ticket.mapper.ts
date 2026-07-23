@@ -16,6 +16,23 @@ export interface TicketDTO {
   comments: Array<{ id: string; message: string; createdBy: UserRef; createdAt: Date }>;
 }
 
+/** Lighter shape for list views — omits comments. */
+export type TicketSummaryDTO = Omit<TicketDTO, 'comments'>;
+
+export function serializeTicketSummary(ticket: TicketWithRefs): TicketSummaryDTO {
+  return {
+    id: ticket.id,
+    title: ticket.title,
+    description: ticket.description,
+    priority: ticket.priority,
+    status: ticket.status,
+    assignedTo: ticket.assignedTo,
+    createdBy: ticket.createdBy,
+    createdAt: ticket.createdAt,
+    updatedAt: ticket.updatedAt,
+  };
+}
+
 type CommentWithAuthor = Comment & { createdBy: UserRef };
 
 /** Maps a Prisma ticket (with relations) to the public API shape. */

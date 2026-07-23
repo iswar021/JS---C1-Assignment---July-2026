@@ -18,3 +18,20 @@ export const validateBody =
     req.body = result.data;
     next();
   };
+
+/**
+ * Validates `req.query` against a zod schema. Because Express exposes `req.query`
+ * as a read-only getter, the parsed (coerced, defaulted) value is stored on
+ * `res.locals.query` for the controller to consume.
+ */
+export const validateQuery =
+  (schema: AnyZodObject): RequestHandler =>
+  (req, res, next) => {
+    const result = schema.safeParse(req.query);
+    if (!result.success) {
+      next(new ValidationError('Validation failed', result.error.flatten().fieldErrors));
+      return;
+    }
+    res.locals.query = result.data;
+    next();
+  };
