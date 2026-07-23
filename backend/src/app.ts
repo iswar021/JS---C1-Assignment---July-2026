@@ -1,9 +1,10 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
+import { ticketRouter } from './modules/tickets/ticket.routes';
+import { errorHandler } from './middleware/error';
 
 /**
  * Builds and configures the Express application.
- * Route modules and the centralized error handler are added in Milestone 3.
  */
 export function createApp(): Express {
   const app = express();
@@ -15,6 +16,12 @@ export function createApp(): Express {
   app.get('/health', (_req: Request, res: Response) => {
     res.json({ status: 'ok' });
   });
+
+  // Feature routes
+  app.use('/api/tickets', ticketRouter);
+
+  // Centralized error handler — must be registered last.
+  app.use(errorHandler);
 
   return app;
 }
