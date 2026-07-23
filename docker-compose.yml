@@ -1,0 +1,30 @@
+# Local PostgreSQL for development and tests.
+# Credentials below are LOCAL-ONLY dev defaults (overridable via env vars); they are
+# not production secrets. The backend reads its own DATABASE_URL from backend/.env.
+#
+# Usage:
+#   docker compose up -d db      # start Postgres in the background
+#   docker compose down          # stop (keeps data)
+#   docker compose down -v       # stop and delete the data volume
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ticket-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ticket}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ticket}
+      POSTGRES_DB: ${POSTGRES_DB:-tickets}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ticket} -d ${POSTGRES_DB:-tickets}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

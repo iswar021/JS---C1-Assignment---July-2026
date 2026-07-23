@@ -1,0 +1,80 @@
+// Prisma schema for the Support Ticket Management System.
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Ticket priority. Displayed in the UI as Low / Medium / High / Urgent.
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+/// Ticket lifecycle status. IN_PROGRESS is displayed as "In Progress".
+/// Allowed transitions are enforced by the backend state machine (see services).
+enum Status {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+/// Internal users. Seeded only in Core (no user-management UI).
+model User {
+  id    String @id @default(uuid())
+  name  String
+  email String @unique
+  role  String
+
+  createdTickets  Ticket[]  @relation("TicketCreatedBy")
+  assignedTickets Ticket[]  @relation("TicketAssignedTo")
+  comments        Comment[]
+}
+
+/// A support ticket that moves through the status state machine.
+model Ticket {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  priority    Priority @default(MEDIUM)
+  status      Status   @default(OPEN)
+
+  assignedToId String?
+  assignedTo   User?   @relation("TicketAssignedTo", fields: [assignedToId], references: [id])
+
+  createdById String
+  createdBy   User   @relation("TicketCreatedBy", fields: [createdById], references: [id])
+
+  comments Comment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([assignedToId])
+}
+
+/// A comment attached to a ticket. Immutable once created (Core).
+model Comment {
+  id       String @id @default(uuid())
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  message String
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+}

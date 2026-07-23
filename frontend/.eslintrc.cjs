@@ -1,0 +1,21 @@
+/** ESLint config for the frontend (React + TypeScript). */
+module.exports = {
+  root: true,
+  env: { browser: true, es2020: true },
+  parser: '@typescript-eslint/parser',
+  parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
+  settings: { react: { version: 'detect' } },
+  plugins: ['@typescript-eslint', 'react-hooks', 'react-refresh'],
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'prettier',
+  ],
+  ignorePatterns: ['dist', 'node_modules', 'vite.config.ts'],
+  rules: {
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
+    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+  },
+};
