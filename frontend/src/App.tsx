@@ -1,20 +1,46 @@
-/**
- * Application shell. This is scaffold-only; pages, routing, and API wiring are
- * added in the frontend implementation milestone.
- */
+import { Route, Routes } from 'react-router-dom';
+import { CurrentUserProvider, useCurrentUser } from './context/CurrentUserContext';
+import { ToastProvider } from './context/ToastContext';
+import { Layout } from './components/Layout';
+import { ErrorState, LoadingState } from './components/states';
+import { TicketListPage } from './pages/TicketListPage';
+import { CreateTicketPage } from './pages/CreateTicketPage';
+import { EditTicketPage } from './pages/EditTicketPage';
+import { TicketDetailPage } from './pages/TicketDetailPage';
+
+/** Gates the app until the seeded users have loaded (needed for author context). */
+function AppContent() {
+  const { loading, error } = useCurrentUser();
+
+  if (loading) return <LoadingState label="Starting up…" />;
+  if (error) {
+    return (
+      <ErrorState
+        message={`Could not load users. ${error}`}
+        onRetry={() => window.location.reload()}
+      />
+    );
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<TicketListPage />} />
+      <Route path="/tickets/new" element={<CreateTicketPage />} />
+      <Route path="/tickets/:id" element={<TicketDetailPage />} />
+      <Route path="/tickets/:id/edit" element={<EditTicketPage />} />
+      <Route path="*" element={<ErrorState message="Page not found." />} />
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <header className="border-b bg-white">
-        <div className="mx-auto max-w-5xl px-4 py-4">
-          <h1 className="text-xl font-semibold">Support Ticket Management</h1>
-        </div>
-      </header>
-      <main className="mx-auto max-w-5xl px-4 py-8">
-        <p className="text-gray-600">
-          Project scaffold initialized. Features arrive in later milestones.
-        </p>
-      </main>
-    </div>
+    <CurrentUserProvider>
+      <ToastProvider>
+        <Layout>
+          <AppContent />
+        </Layout>
+      </ToastProvider>
+    </CurrentUserProvider>
   );
 }

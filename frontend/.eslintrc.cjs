@@ -15,7 +15,10 @@ module.exports = {
   rules: {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
-    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    'react-refresh/only-export-components': [
+      'warn',
+      { allowConstantExport: true, allowExportNames: ['useToast', 'useCurrentUser'] },
+    ],
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
   },
 };
