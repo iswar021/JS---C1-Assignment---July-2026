@@ -9,6 +9,18 @@ export const ticketInclude = {
 
 export type TicketWithRefs = Prisma.TicketGetPayload<{ include: typeof ticketInclude }>;
 
+/** Relations for a ticket detail view: user references plus ordered comments. */
+export const ticketDetailInclude = {
+  assignedTo: { select: { id: true, name: true } },
+  createdBy: { select: { id: true, name: true } },
+  comments: {
+    include: { createdBy: { select: { id: true, name: true } } },
+    orderBy: { createdAt: 'asc' },
+  },
+} satisfies Prisma.TicketInclude;
+
+export type TicketWithDetails = Prisma.TicketGetPayload<{ include: typeof ticketDetailInclude }>;
+
 export interface ListTicketsParams {
   q?: string;
   status?: Status;
@@ -20,6 +32,11 @@ export interface ListTicketsParams {
 export const ticketRepository = {
   create(data: Prisma.TicketUncheckedCreateInput): Promise<TicketWithRefs> {
     return prisma.ticket.create({ data, include: ticketInclude });
+  },
+
+  /** Fetches a single ticket with its comments, or null if it does not exist. */
+  findById(id: string): Promise<TicketWithDetails | null> {
+    return prisma.ticket.findUnique({ where: { id }, include: ticketDetailInclude });
   },
 
   /**

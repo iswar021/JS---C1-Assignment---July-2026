@@ -1,12 +1,21 @@
-import { ValidationError } from '../../errors/AppError';
+import { NotFoundError, ValidationError } from '../../errors/AppError';
 import { userRepository } from '../users/user.repository';
-import { ticketRepository, TicketWithRefs } from './ticket.repository';
+import { ticketRepository, TicketWithDetails, TicketWithRefs } from './ticket.repository';
 import { serializeTicketSummary, TicketSummaryDTO } from './ticket.mapper';
 import { CreateTicketInput, ListTicketsQuery } from './ticket.schema';
 
 export interface PaginatedTickets {
   data: TicketSummaryDTO[];
   pagination: { page: number; pageSize: number; total: number; totalPages: number };
+}
+
+/** Fetches a single ticket (with comments) or throws 404 if it does not exist. */
+export async function getTicketById(id: string): Promise<TicketWithDetails> {
+  const ticket = await ticketRepository.findById(id);
+  if (!ticket) {
+    throw new NotFoundError('Ticket not found');
+  }
+  return ticket;
 }
 
 /** Lists tickets with keyword/status filtering and pagination. */

@@ -37,3 +37,10 @@ export const listTicketsQuerySchema = z.object({
 });
 
 export type ListTicketsQuery = z.infer<typeof listTicketsQuerySchema>;
+
+/** Route param schema for endpoints addressing a single ticket by id. */
+export const ticketIdParamSchema = z.object({
+  id: z.string().uuid('Invalid ticket id'),
+});
+
+export type TicketIdParam = z.infer<typeof ticketIdParamSchema>;

@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import * as ticketService from './ticket.service';
 import { serializeTicket } from './ticket.mapper';
-import { ListTicketsQuery } from './ticket.schema';
+import { ListTicketsQuery, TicketIdParam } from './ticket.schema';
 
 /** POST /api/tickets — create a ticket. */
 export const createTicket: RequestHandler = async (req, res, next) => {
@@ -19,6 +19,17 @@ export const listTickets: RequestHandler = async (_req, res, next) => {
     const query = res.locals.query as ListTicketsQuery;
     const result = await ticketService.listTickets(query);
     res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/** GET /api/tickets/:id — fetch a single ticket with its comments. */
+export const getTicket: RequestHandler = async (_req, res, next) => {
+  try {
+    const { id } = res.locals.params as TicketIdParam;
+    const ticket = await ticketService.getTicketById(id);
+    res.json(serializeTicket(ticket));
   } catch (err) {
     next(err);
   }

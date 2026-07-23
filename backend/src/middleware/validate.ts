@@ -35,3 +35,19 @@ export const validateQuery =
     res.locals.query = result.data;
     next();
   };
+
+/**
+ * Validates `req.params` against a zod schema. The parsed value is stored on
+ * `res.locals.params` for the controller to consume.
+ */
+export const validateParams =
+  (schema: AnyZodObject): RequestHandler =>
+  (req, res, next) => {
+    const result = schema.safeParse(req.params);
+    if (!result.success) {
+      next(new ValidationError('Validation failed', result.error.flatten().fieldErrors));
+      return;
+    }
+    res.locals.params = result.data;
+    next();
+  };
