@@ -38,6 +38,35 @@ export const listTicketsQuerySchema = z.object({
 
 export type ListTicketsQuery = z.infer<typeof listTicketsQuerySchema>;
 
+/**
+ * Request schema for updating ticket fields. All fields optional, but at least
+ * one must be provided. `.strict()` rejects unknown keys — notably `status`,
+ * which must be changed via the dedicated state-machine endpoint. `assignedToId`
+ * may be `null` to unassign.
+ */
+export const updateTicketSchema = z
+  .object({
+    title: z.string().trim().min(1, 'Title is required').max(200, 'Title is too long').optional(),
+    description: z
+      .string()
+      .trim()
+      .min(1, 'Description is required')
+      .max(5000, 'Description is too long')
+      .optional(),
+    priority: z
+      .nativeEnum(Priority, {
+        errorMap: () => ({ message: 'Priority must be one of LOW, MEDIUM, HIGH, URGENT' }),
+      })
+      .optional(),
+    assignedToId: z.string().uuid('assignedToId must be a valid user id').nullable().optional(),
+  })
+  .strict('Unknown field. Note: status is changed via PATCH /tickets/:id/status')
+  .refine((data) => Object.keys(data).length > 0, {
+    message: 'At least one field must be provided',
+  });
+
+export type UpdateTicketInput = z.infer<typeof updateTicketSchema>;
+
 /** Route param schema for endpoints addressing a single ticket by id. */
 export const ticketIdParamSchema = z.object({
   id: z.string().uuid('Invalid ticket id'),

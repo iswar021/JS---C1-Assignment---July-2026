@@ -1,8 +1,9 @@
+import { Prisma } from '@prisma/client';
 import { NotFoundError, ValidationError } from '../../errors/AppError';
 import { userRepository } from '../users/user.repository';
 import { ticketRepository, TicketWithDetails, TicketWithRefs } from './ticket.repository';
 import { serializeTicketSummary, TicketSummaryDTO } from './ticket.mapper';
-import { CreateTicketInput, ListTicketsQuery } from './ticket.schema';
+import { CreateTicketInput, ListTicketsQuery, UpdateTicketInput } from './ticket.schema';
 
 export interface PaginatedTickets {
   data: TicketSummaryDTO[];
@@ -16,6 +17,40 @@ export async function getTicketById(id: string): Promise<TicketWithDetails> {
     throw new NotFoundError('Ticket not found');
   }
   return ticket;
+}
+
+/**
+ * Updates editable ticket fields (title, description, priority, assignee).
+ * Business rules:
+ *  - the ticket must exist (else 404);
+ *  - a provided assignee must reference an existing user (else 400);
+ *  - status is NOT updatable here (rejected at the schema layer).
+ */
+export async function updateTicket(
+  id: string,
+  input: UpdateTicketInput,
+): Promise<TicketWithDetails> {
+  const exists = await ticketRepository.exists(id);
+  if (!exists) {
+    throw new NotFoundError('Ticket not found');
+  }
+
+  if (input.assignedToId) {
+    const assigneeExists = await userRepository.existsById(input.assignedToId);
+    if (!assigneeExists) {
+      throw new ValidationError('Validation failed', {
+        assignedToId: ['User does not exist'],
+      });
+    }
+  }
+
+  const data: Prisma.TicketUncheckedUpdateInput = {};
+  if (input.title !== undefined) data.title = input.title;
+  if (input.description !== undefined) data.description = input.description;
+  if (input.priority !== undefined) data.priority = input.priority;
+  if (input.assignedToId !== undefined) data.assignedToId = input.assignedToId; // may be null
+
+  return ticketRepository.update(id, data);
 }
 
 /** Lists tickets with keyword/status filtering and pagination. */

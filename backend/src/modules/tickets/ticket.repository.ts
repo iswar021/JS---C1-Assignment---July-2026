@@ -39,6 +39,17 @@ export const ticketRepository = {
     return prisma.ticket.findUnique({ where: { id }, include: ticketDetailInclude });
   },
 
+  /** Returns whether a ticket with the given id exists. */
+  async exists(id: string): Promise<boolean> {
+    const ticket = await prisma.ticket.findUnique({ where: { id }, select: { id: true } });
+    return ticket !== null;
+  },
+
+  /** Updates ticket fields and returns the ticket with its comments. */
+  update(id: string, data: Prisma.TicketUncheckedUpdateInput): Promise<TicketWithDetails> {
+    return prisma.ticket.update({ where: { id }, data, include: ticketDetailInclude });
+  },
+
   /**
    * Returns a page of tickets matching the optional keyword/status filters, plus
    * the total match count (for pagination). Keyword search is case-insensitive

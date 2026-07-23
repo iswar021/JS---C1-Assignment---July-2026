@@ -4,6 +4,7 @@ import {
   createTicketSchema,
   listTicketsQuerySchema,
   ticketIdParamSchema,
+  updateTicketSchema,
 } from './ticket.schema';
 import * as ticketController from './ticket.controller';
 
@@ -17,3 +18,11 @@ ticketRouter.get('/:id', validateParams(ticketIdParamSchema), ticketController.g
 
 // Create a ticket
 ticketRouter.post('/', validateBody(createTicketSchema), ticketController.createTicket);
+
+// Update editable ticket fields (title, description, priority, assignee)
+ticketRouter.patch(
+  '/:id',
+  validateParams(ticketIdParamSchema),
+  validateBody(updateTicketSchema),
+  ticketController.updateTicket,
+);

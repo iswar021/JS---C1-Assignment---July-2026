@@ -34,3 +34,14 @@ export const getTicket: RequestHandler = async (_req, res, next) => {
     next(err);
   }
 };
+
+/** PATCH /api/tickets/:id — update editable ticket fields. */
+export const updateTicket: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = res.locals.params as TicketIdParam;
+    const ticket = await ticketService.updateTicket(id, req.body);
+    res.json(serializeTicket(ticket));
+  } catch (err) {
+    next(err);
+  }
+};
