@@ -33,4 +33,20 @@ states clearly.
 3. Backend: copy `.env.example` → `.env`, `npm install`, migrate, seed, `npm run dev`.
 4. Frontend: `npm install`, `npm run dev`.
 
-Full instructions live in `README.md` and `database/setup-notes.md`.
+Full instructions: `README.md`, `docs/installation-guide.md`, `database/setup-notes.md`.
+
+## Artifact pointers (for Part C form)
+
+| Topic | Path |
+| ----- | ---- |
+| AI tool workflow (Part A) | `tool-workflow.md` |
+| Prompt history | `ai-prompts/` |
+| Cursor-specific pack | `tool-specific/cursor-workflow/` |
+| Reflection | `reflection.md` |
+| Final AI usage summary | `final-ai-usage-summary.md` |
+| Full sanitized chat history | `docs/chat-history.md` |
+| Chat prompt index | `docs/chat-history-index.md` |
+| Debugging / AI mistake fixed | `debugging-notes.md` (esp. §1 Prisma/Jest, §8 PAT refusal) |
+| Review + fixes | `code-review-notes.md`, `review-fixes.md` |
+| PR body | `pr-description.md` |
+| Requirement checklist | `docs/requirement-checklist.md` |

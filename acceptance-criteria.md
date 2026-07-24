@@ -53,11 +53,13 @@ checks. `[ ]` = planned, will be ticked as milestones land.
 
 ## Documentation
 
-- [ ] README setup instructions work on a clean machine.
-- [ ] `database/setup-notes.md` documents schema, migration, and seed steps.
-- [ ] `.env.example` lists all required environment variables.
-- [ ] API documented in `api-contract.md` (and Swagger if pursued as Stretch).
-- [ ] Prompt history captured under `ai-prompts/`.
+- [x] README setup instructions work on a clean machine.
+- [x] `database/setup-notes.md` documents schema, migration, and seed steps.
+- [x] `.env.example` lists all required environment variables.
+- [x] API documented in `api-contract.md` (and Swagger if pursued as Stretch).
+- [x] Prompt history captured under `ai-prompts/`.
+- [x] Part A `tool-workflow.md` and Cursor pack under `tool-specific/cursor-workflow/`.
+- [x] Lifecycle artifacts: test-strategy/results, debugging, review, PR, reflection, AI summary.
 
 ## Security
 

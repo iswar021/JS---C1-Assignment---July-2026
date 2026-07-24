@@ -54,7 +54,10 @@ stretch. See `acceptance-criteria.md` (root) for the testable criteria.
 | Restricted CORS | ✅ | `CORS_ORIGIN` |
 | Reproducible installs | ✅ | Pinned Node (`.nvmrc`) + lockfiles |
 | Meaningful, milestone-scoped commits | ✅ | See git history |
-| Documentation | ✅ | This `docs/` set + root planning docs |
+| Documentation | ✅ | Root lifecycle docs + `docs/` as-built guides |
+| Prompt history (`ai-prompts/`) | ✅ | planning → documentation phases |
+| Cursor workflow pack | ✅ | `tool-specific/cursor-workflow/` |
+| Part A tool workflow | ✅ | `tool-workflow.md` |
 
 ## Verification (this phase)
 

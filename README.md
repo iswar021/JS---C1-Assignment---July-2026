@@ -39,15 +39,19 @@ design, testing, review, reflection, and AI-usage documentation).
 .
 ├── README.md                     # This file — start here
 ├── candidate-info.md             # Candidate & submission metadata
+├── tool-workflow.md              # Part A — how Cursor was used
 ├── assessment-summary.md         # Assessment requirements summary
 ├── requirements-analysis.md      # Functional / non-functional requirements
 ├── acceptance-criteria.md        # Testable acceptance criteria
 ├── implementation-plan.md        # Milestones, tasks, risks
 ├── design-notes.md               # Original architecture & design document
-├── data-model.md                 # Entities, relations, enums
-├── api-contract.md               # REST endpoint contract
-├── ui-flow.md                    # Frontend screens & flows
-├── docs/                         # Final assessment deliverables (see index below)
+├── data-model.md · api-contract.md · ui-flow.md
+├── test-strategy.md · test-results.md
+├── debugging-notes.md · code-review-notes.md · review-fixes.md
+├── pr-description.md · reflection.md · final-ai-usage-summary.md
+├── docs/                         # As-built guides (install, API, architecture, …)
+├── ai-prompts/                   # Grouped prompt history by lifecycle phase
+├── tool-specific/cursor-workflow/# Cursor context, spec, tasks, rules
 ├── backend/                      # Express + TS API + Prisma
 ├── frontend/                     # React + TS + Tailwind app
 ├── database/                     # Setup notes (schema/migrations live in backend/prisma)
@@ -104,7 +108,23 @@ cd frontend && npm run build && npm run lint
 
 ## Documentation Index
 
-Final assessment deliverables live in **`docs/`**:
+### Assessment lifecycle (repository root — Part A / Part C)
+
+| Document | Description |
+| -------- | ----------- |
+| [Tool Workflow](tool-workflow.md) | Part A — Cursor usage across the lifecycle |
+| [Test Strategy](test-strategy.md) | Testing approach & rationale |
+| [Test Results](test-results.md) | Latest suite / build verification snapshot |
+| [Debugging Notes](debugging-notes.md) | Issues found and how they were fixed |
+| [Code Review Notes](code-review-notes.md) | Self-review across quality dimensions |
+| [Review Fixes](review-fixes.md) | Fixes applied from review / QA |
+| [PR Description](pr-description.md) | Submission PR summary & test plan |
+| [Reflection](reflection.md) | What worked / what I'd change |
+| [Final AI Usage Summary](final-ai-usage-summary.md) | Consolidated AI-usage report |
+| [AI Prompts](ai-prompts/) | Prompt history by phase |
+| [Cursor Workflow](tool-specific/cursor-workflow/) | Project context, spec, tasks, rules |
+
+### As-built guides (`docs/`)
 
 | Document | Description |
 | -------- | ----------- |
@@ -113,18 +133,16 @@ Final assessment deliverables live in **`docs/`**:
 | [Project Architecture](docs/architecture.md) | As-built architecture & layering |
 | [API Documentation](docs/api-documentation.md) | Endpoints, requests, responses, errors |
 | [Database Design](docs/database-design.md) | Schema, relations, indexes, migrations |
-| [Testing Strategy](docs/testing-strategy.md) | What is tested and why + results |
-| [AI Usage Workflow](docs/ai-usage-workflow.md) | How AI was used across the lifecycle |
+| [Testing Strategy](docs/testing-strategy.md) | Expanded coverage map |
+| [AI Usage Workflow](docs/ai-usage-workflow.md) | Detailed AI lifecycle narrative |
 | [Design Decisions](docs/design-decisions.md) | Key decisions and trade-offs |
-| [Code Review Notes](docs/code-review-notes.md) | Final review findings |
-| [Bug Fix Summary](docs/bug-fix-summary.md) | Issues found and fixed |
-| [Reflection](docs/reflection.md) | What worked, what I'd change |
-| [Final AI Usage Summary](docs/final-ai-usage-summary.md) | Consolidated AI-usage report |
 | [Requirement Checklist](docs/requirement-checklist.md) | Assessment coverage checklist |
+| [Chat History](docs/chat-history.md) | Sanitized Cursor session dialogue |
+| [Chat History Index](docs/chat-history-index.md) | User-prompt table of contents |
 
-Supporting planning artifacts at the repository root: `requirements-analysis.md`,
-`acceptance-criteria.md`, `design-notes.md`, `data-model.md`, `api-contract.md`,
-`ui-flow.md`.
+Planning artifacts: `assessment-summary.md`, `requirements-analysis.md`,
+`acceptance-criteria.md`, `implementation-plan.md`, `design-notes.md`,
+`data-model.md`, `api-contract.md`, `ui-flow.md`.
 
 ## Security
 
